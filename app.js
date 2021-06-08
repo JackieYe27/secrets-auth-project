@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config()
 import express from "express";
 import mongoose from "mongoose";
 import encrypt from "mongoose-encryption";
@@ -21,8 +23,7 @@ const userSchema = new mongoose.Schema ({
 });
 
 // Adding new level of security with mongoose encryption
-const secret = "createarandomstringthatislong."
-userSchema.plugin(encrypt, {secret: secret, encryptedFields: ["password"]});
+userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ["password"]});
 
 const User = new mongoose.model("User", userSchema);
 
