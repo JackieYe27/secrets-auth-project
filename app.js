@@ -3,6 +3,8 @@ dotenv.config()
 import express from "express";
 import mongoose from "mongoose";
 import encrypt from "mongoose-encryption";
+import bcrypt from "bcrypt";
+const saltRounds = 10;
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -44,13 +46,20 @@ app.get("/logout", (req,res) => {
 
 app.post("/register", (req,res) => {
     const {username, password} = req.body;
-    const newUser = new User ({
-        email: username,
-        password: password
-    });
-    newUser.save((err) => {
-        if (err) console.log(err);
-        else res.render("secrets");
+    bcrypt.hash(password, saltRounds, function(err, hash) {
+        // Store hash in your password DB.
+        if(err) {
+            console.log(err);
+        } else {
+            const newUser = new User ({
+                email: username,
+                password: hash
+            });
+            newUser.save((err) => {
+                if (err) console.log(err);
+                else res.render("secrets");
+            });
+        }
     });
 });
 
@@ -61,9 +70,11 @@ app.post("/login", (req,res) => {
             console.log(err);
         } else {
             if (foundUser) {
-                if (foundUser.password === password) {
-                    res.render("secrets");
-                }
+                bcrypt.compare(password, foundUser.password, function(err, result) {
+                    if(result === true) {
+                        res.render("secrets");
+                    }
+                });
             }
         }
     })
