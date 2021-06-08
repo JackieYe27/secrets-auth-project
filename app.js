@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import encrypt from "mongoose-encryption";
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -18,6 +19,10 @@ const userSchema = new mongoose.Schema ({
     email: String,
     password: String
 });
+
+// Adding new level of security with mongoose encryption
+const secret = "createarandomstringthatislong."
+userSchema.plugin(encrypt, {secret: secret, encryptedFields: ["password"]});
 
 const User = new mongoose.model("User", userSchema);
 
